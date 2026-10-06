@@ -1,0 +1,35 @@
+17:50:59 POST BASLADI | duel=651
+17:51:03 POST BASLADI | duel=651
+17:51:03 POST BASLADI | duel=651
+17:51:42 REQIB YOX | reqib_hucum='0'
+17:52:43 REQIB HUCUM RAW=NULL | column=oyuncu1_hucum
+17:52:47 REQIB HUCUM RAW='0' | column=oyuncu2_hucum
+17:55:03 ILK ZERBE IF-INE GIRDI
+17:55:52 UPDATE BITDI | rows=1
+17:56:32 REDIRECT LIS-1 VERILIR
+17:57:19 LIS1 | menim='0' | reqib=NULL
+17:57:21 LIS1 | menim=NULL | reqib='0'
+17:58:31 LIS1 BLOKU ACILDI
+17:58:34 LIS1 BLOKU ACILDI
+17:58:34 LIS1 BLOKU ACILDI
+17:58:35 LIS1 BLOKU ACILDI
+18:04:08 LIS1 | my_id=14 | duel=651
+18:04:17 LIS1 | my_id=18 | duel=652
+18:04:18 LIS1 | my_id=18 | duel=652
+18:05:45 LIS1 | my_id=18 | duel=652
+18:05:47 LIS1 | my_id=18 | duel=652
+18:05:53 LIS1 | my_id=14 | duel=652
+18:06:43 LIS1 | my_id=18 | duel=652
+18:11:03 LIS1 | my_id=18 | duel=652
+18:11:05 LIS1 | my_id=14 | duel=652
+18:11:07 LIS1 | my_id=14 | duel=652
+18:12:53 LIS1 | my_id=18 | duel=652
+18:12:55 POST | go=vurdum | duel=652 | my_id=18 | hucum=0 | mudafie=0
+18:13:12 POST | go=vurdum | duel=652 | my_id=18 | hucum=0 | mudafie=0
+18:13:12 LIS1 | my_id=18 | duel=652
+18:13:14 LIS1 | my_id=14 | duel=652
+18:13:15 POST | go=vurdum | duel=652 | my_id=14 | hucum=0 | mudafie=0
+18:13:15 POST | go=vurdum | duel=652 | my_id=14 | hucum=0 | mudafie=0
+18:13:15 LIS1 | my_id=14 | duel=652
+18:15:47 LIS1 | my_id=18 | duel=652
+18:16:47 LIS1 | my_id=14 | duel=652
