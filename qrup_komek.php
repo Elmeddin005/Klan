@@ -1387,6 +1387,57 @@ $stmt_hec_hece->execute([
     $reqib_user_id,
     $timeout_user_id
 ]);
+
+if ($stmt_hec_hece->rowCount() === 0) {
+
+    $stmt_hec_hece_insert = $pdo_qrup->prepare("
+        INSERT INTO qrup_doyusleri
+        (
+            qrup_id,
+            oyuncu1_id,
+            oyuncu2_id,
+            qalib_id,
+            yaradilis_tarixi,
+            qebul_edildi,
+            novbe_id,
+            raund,
+            oyuncu1_can,
+            oyuncu2_can,
+            bitdi,
+            bitdi_qalib,
+            bitdi_meglub,
+            hec_hece,
+            novbe_baslama_tarixi
+        )
+        VALUES
+        (
+            ?,
+            ?,
+            ?,
+            NULL,
+            NOW(),
+            1,
+            NULL,
+            1,
+            ?,
+            ?,
+            1,
+            NULL,
+            NULL,
+            1,
+            NOW()
+        )
+    ");
+
+    $stmt_hec_hece_insert->execute([
+        $qrup_id,
+        $timeout_user_id,
+        $reqib_user_id,
+        $hec_hece_canlar[$timeout_user_id],
+        $hec_hece_canlar[$reqib_user_id]
+    ]);
+}
+
   $stmt_cixar = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
@@ -2245,6 +2296,7 @@ $stmt_netice = $pdo_qrup->prepare("
        AND qu.user_id = qd.qalib_id
        AND qu.status = 1
     WHERE qd.qrup_id = :qrup_id
+      AND qd.bitdi = 1
     ORDER BY qd.id DESC
     LIMIT 1
 ");
@@ -2613,7 +2665,7 @@ height:1px;
      IZLE
 ===================================================== -->
 
-<?php if ($go === 'izle'): ?>
+<?php if ($go !== 'izle' || $menim_qrup_neticesi !== null): ?>
 
     <?php if ($izle_status === 1): ?>
 
@@ -2696,12 +2748,9 @@ height:1px;
 
     <?php else: ?>
 
-        <div class="error">
-
-            Siz hazırda döyüşə qoşulmamısınız.
-
-        </div>
-
+      <div class="error" style="display:none;">
+    Siz hazırda döyüşə qoşulmamısınız.
+</div>
     <?php endif; ?>
 
 <?php endif; ?>
@@ -2834,20 +2883,13 @@ height:1px;
 <?php endif; ?>
 <?php if ($menim_qrup_neticesi === 'hec_hece'): ?>
 
-<div class="error">
-    <b>HEÇ-HEÇƏ!</b><br/>
-    Hər iki tərəf zərbə vurmadı.
-</div>
+
 
 <?php endif; ?>
-Yəni sıra belə olacaq:
+
 
 <?php if ($menim_qrup_neticesi === 'hec_hece'): ?>
 
-<div class="error">
-    <b>HEÇ-HEÇƏ!</b><br/>
-    Hər iki tərəf zərbə vurmadı.
-</div>
 
 <?php endif; ?>
 
@@ -3920,8 +3962,6 @@ if (
     clearInterval(timeoutInterval);
 
     timeoutYoxlanir = true;
-
-    window.location.reload();
 
     return;
 }
