@@ -1302,43 +1302,30 @@ $hec_hece_artiq_var =
 if ($hec_hece_artiq_var) {
     continue;
 }
-        $stmt_hec_hece = $pdo_qrup->prepare("
-            INSERT INTO qrup_doyusleri
-            (
-                qrup_id,
-                oyuncu1_id,
-                oyuncu2_id,
-                oyuncu1_can,
-                oyuncu2_can,
-                qalib_id,
-                bitdi,
-                bitdi_qalib,
-                bitdi_meglub,
-                hec_hece,
-                novbe_baslama_tarixi
-            )
-          VALUES
-(
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    NULL,
-    1,
-    NULL,
-    NULL,
-    1,
-    NOW()
-)
-        ");
+      $stmt_hec_hece = $pdo_qrup->prepare("
+    UPDATE qrup_doyusleri
+    SET
+        oyuncu1_can = ?,
+        oyuncu2_can = ?,
+        qalib_id = NULL,
+        bitdi = 1,
+        bitdi_qalib = NULL,
+        bitdi_meglub = NULL,
+        hec_hece = 1
+    WHERE qrup_id = ?
+      AND oyuncu1_id = ?
+      AND oyuncu2_id = ?
+      AND bitdi = 0
+    ORDER BY id DESC
+    LIMIT 1
+");
 
-       $stmt_hec_hece->execute([
+$stmt_hec_hece->execute([
+    $hec_hece_canlar[$timeout_user_id],
+    $hec_hece_canlar[$reqib_user_id],
     $qrup_id,
     $timeout_user_id,
-    $reqib_user_id,
-    $hec_hece_canlar[$timeout_user_id],
-    $hec_hece_canlar[$reqib_user_id]
+    $reqib_user_id
 ]);
 
   $stmt_cixar = $pdo_qrup->prepare("
