@@ -3750,7 +3750,7 @@ setInterval(
     "use strict";
 
     var timeoutYoxlanir = false;
-
+var timeoutInterval = null;
     function timeoutYoxla() {
 
         if (timeoutYoxlanir) {
@@ -3796,20 +3796,24 @@ console.log("TIMEOUT AJAX URL:", url);
                             xhr.responseText
                         );
 
-            if (
+if (
     cavab.ok &&
     cavab.reload === 1
 ) {
 
-    window.location.href =
-        "qrup_komek.php"
-        + "?lis=<?php echo (int)$qrup_id; ?>"
-        + "&t="
-        + new Date().getTime();
+    /*
+     * Nəticə artıq serverdə hesablandı.
+     * Səhifəni avtomatik yeniləmə.
+     *
+     * İstifadəçi özü F5 / Refresh edəndə
+     * nəticə ekranda görünəcək.
+     */
+    clearInterval(timeoutInterval);
+
+    timeoutYoxlanir = true;
 
     return;
 }
-
 
 
                 } catch (e) {}
@@ -3832,10 +3836,10 @@ console.log("TIMEOUT AJAX URL:", url);
 
     timeoutYoxla();
 
-    setInterval(
-        timeoutYoxla,
-        1000
-    );
+  timeoutInterval = setInterval(
+    timeoutYoxla,
+    1000
+);
 
 })();
 
