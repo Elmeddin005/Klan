@@ -1385,7 +1385,12 @@ if (
  * =================================================
  */
 
-if ($timeout_sonuncudur && $reqib_sonuncudur) {
+if (
+    $timeout_sonuncudur &&
+    $reqib_sonuncudur &&
+    $menim_canli_say === 0 &&
+    $reqib_canli_say === 0
+) {
 
     /*
      * Rəqib də sonuncudur və hücum etməyib:
@@ -1660,6 +1665,37 @@ $stmt_cixar->execute([
         continue;
     }
 }
+/*
+ * =================================================
+ * TƏRƏFDƏ BAŞQA CANLI OYUNÇU VAR?
+ * =================================================
+ */
+
+$stmt_teref_canli = $pdo_qrup->prepare("
+    SELECT COUNT(*)
+    FROM qrup_uzvleri
+    WHERE qrup_id = ?
+      AND terefi = ?
+      AND status = 1
+      AND user_id != ?
+      AND (
+          son_can IS NULL
+          OR son_can > 0
+      )
+      AND (
+          doyus_bildirisi IS NULL
+          OR doyus_bildirisi != 2
+      )
+");
+
+$stmt_teref_canli->execute([
+    $qrup_id,
+    (int)$tr['terefi'],
+    (int)$tr['user_id']
+]);
+
+$terefde_canli_qalan =
+    (int)$stmt_teref_canli->fetchColumn();
             /*
              * =================================================
              * 6. 59 SANİYƏDƏ ZƏRBƏ VURMAYAN OYUNÇUNU ÇIXAR
