@@ -2706,7 +2706,7 @@ height:1px;
 
 <?php endif; ?>
 
-<?php if ($go !== 'izle'): ?>
+
 <?php if ($menim_qrup_neticesi === null): ?>
 <!-- =====================================================
      ƏSAS STATUS
@@ -3856,7 +3856,7 @@ setInterval(
 );
 
 </script>
-<?php endif; ?>
+
 
 </div>
 
