@@ -1343,7 +1343,26 @@ if ($son_aktiv_doyus) {
     }
 }
 
+$stmt_ilk_baslama = $pdo_qrup->prepare("
+    SELECT MIN(son_doyuse_qosulma_vaxti)
+    FROM qrup_uzvleri
+    WHERE qrup_id = ?
+      AND user_id IN (?, ?)
+      AND status = 1
+      AND son_doyuse_qosulma_vaxti IS NOT NULL
+");
 
+$stmt_ilk_baslama->execute([
+    $lis,
+    $menim_id,
+    $reqib_id
+]);
+
+$ilk_baslama_vaxti = $stmt_ilk_baslama->fetchColumn();
+
+if (!$ilk_baslama_vaxti) {
+    $ilk_baslama_vaxti = date('Y-m-d H:i:s');
+}
 /* =========================================================
    YENİ DÖYÜŞ
 ========================================================= */
@@ -1380,127 +1399,127 @@ $can2 = baslangicCaniniTap(
     $reqib_max_can
 );
 
-    $stmt = $pdo_qrup->prepare("
-        INSERT INTO qrup_doyusleri
-        (
-            qrup_id,
+$stmt = $pdo_qrup->prepare("
+    INSERT INTO qrup_doyusleri
+    (
+        qrup_id,
 
-            oyuncu1_id,
-            oyuncu2_id,
+        oyuncu1_id,
+        oyuncu2_id,
 
-            qalib_id,
+        qalib_id,
 
-            yaradilis_tarixi,
-            qebul_edildi,
+        yaradilis_tarixi,
+        qebul_edildi,
 
-            novbe_id,
-            raund,
+        novbe_id,
+        raund,
 
-            oyuncu1_can,
-            oyuncu2_can,
+        oyuncu1_can,
+        oyuncu2_can,
 
-            oyuncu1_mudafie,
-            oyuncu1_hucum,
+        oyuncu1_mudafie,
+        oyuncu1_hucum,
 
-            oyuncu2_mudafie,
-            oyuncu2_hucum,
+        oyuncu2_mudafie,
+        oyuncu2_hucum,
 
-            son_hucum_eden,
+        son_hucum_eden,
 
-            son_oyuncu1_hucum,
-            son_oyuncu2_hucum,
+        son_oyuncu1_hucum,
+        son_oyuncu2_hucum,
 
-            son_mudafie_eden,
+        son_mudafie_eden,
 
-            son_zarar,
-            son_kritik,
-            son_xeta,
-            son_mudafie,
+        son_zarar,
+        son_kritik,
+        son_xeta,
+        son_mudafie,
 
-            novbe_baslama_tarixi,
+        novbe_baslama_tarixi,
 
-            son_oyuncu1_zarar,
-            son_oyuncu2_zarar,
+        son_oyuncu1_zarar,
+        son_oyuncu2_zarar,
 
-            son_oyuncu1_kritik,
-            son_oyuncu2_kritik,
+        son_oyuncu1_kritik,
+        son_oyuncu2_kritik,
 
-            son_oyuncu1_xeta,
-            son_oyuncu2_xeta,
+        son_oyuncu1_xeta,
+        son_oyuncu2_xeta,
 
-            bitdi,
-            bitdi_qalib,
-            bitdi_meglub,
-            hec_hece,
+        bitdi,
+        bitdi_qalib,
+        bitdi_meglub,
+        hec_hece,
 
-            oyuncu1_hucum_vaxti,
-            oyuncu2_hucum_vaxti
-        )
+        oyuncu1_hucum_vaxti,
+        oyuncu2_hucum_vaxti
+    )
 
-        VALUES
-        (
-            ?,
-            ?,
-            ?,
+    VALUES
+    (
+        ?,
+        ?,
+        ?,
 
-            NULL,
+        NULL,
 
-            NOW(),
-            1,
+        NOW(),
+        1,
 
-            NULL,
-            1,
+        NULL,
+        1,
 
-            ?,
-            ?,
+        ?,
+        ?,
 
-            NULL,
-            NULL,
+        NULL,
+        NULL,
 
-            NULL,
-            NULL,
+        NULL,
+        NULL,
 
-            NULL,
+        NULL,
 
-            NULL,
-            NULL,
+        NULL,
+        NULL,
 
-            NULL,
+        NULL,
 
-            0,
-            0,
-            0,
-            0,
+        0,
+        0,
+        0,
+        0,
 
-            NOW(),
+        ?,
 
-            0,
-            0,
+        0,
+        0,
 
-            0,
-            0,
+        0,
+        0,
 
-            0,
-            0,
+        0,
+        0,
 
-            0,
-            0,
-            0,
-            0,
+        0,
+        0,
+        0,
+        0,
 
-            NULL,
-            NULL
-        )
-    ");
+        NULL,
+        NULL
+    )
+");
 
-    $stmt->execute([
-        $lis,
-        $menim_id,
-        $reqib_id,
-        $can1,
-        $can2
-    ]);
-
+$stmt->execute([
+    $lis,
+    $menim_id,
+    $reqib_id,
+    $can1,
+    $can2,
+    $ilk_baslama_vaxti
+]);
 
     /*
      * Mütləq yeni döyüşün ID-si.
