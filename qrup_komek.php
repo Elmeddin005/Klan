@@ -573,7 +573,10 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
                 $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
 
 
-            if ($novbeti) {
+            if (
+    $novbeti &&
+    $terefde_canli_qalan > 0
+) {
 
                 /*
                  * Növbəti oyunçunu döyüşə qoş.
@@ -1764,9 +1767,12 @@ $terefde_canli_qalan =
              * =================================================
              */
 
-            if ($novbeti) {
-
-                $stmt_qos = $pdo_qrup->prepare("
+        
+if (
+    $novbeti &&
+    $terefde_canli_qalan > 0
+) {
+    $stmt_qos = $pdo_qrup->prepare("
                     UPDATE qrup_uzvleri
                     SET
                         doyuse_qosuldu = 1,
