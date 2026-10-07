@@ -1044,12 +1044,13 @@ $reqib_teref =
     ($timeout_teref === 1) ? 2 : 1;
 
 $stmt_reqib_aktiv = $pdo_qrup->prepare("
-    SELECT
-        user_id,
-        terefi,
-        doyuse_qosuldu,
-        son_can,
-        son_doyuse_qosulma_vaxti
+   SELECT
+    user_id,
+    terefi,
+    doyuse_qosuldu,
+    son_can,
+    son_doyuse_qosulma_vaxti,
+    can
     FROM qrup_uzvleri
     WHERE qrup_id = ?
       AND terefi = ?
@@ -1253,12 +1254,9 @@ if ($timeout_sonuncudur && $reqib_sonuncudur) {
         !$reqib_hucum_edib &&
         !$hucum_edib
     ) {
-              $timeout_son_can = (int)($tr['son_can'] ?? 0);
-$reqib_son_can   = (int)($reqib_aktiv['son_can'] ?? 0);
-
-$hec_hece_canlar = [
-    $timeout_user_id => $timeout_son_can,
-    $reqib_user_id   => $reqib_son_can
+              $hec_hece_canlar = [
+    $timeout_user_id => (int)($tr['son_can'] ?? $tr['can'] ?? 0),
+    $reqib_user_id   => (int)($reqib_aktiv['son_can'] ?? $reqib_aktiv['can'] ?? 0)
 ];
 
 /*
