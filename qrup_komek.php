@@ -821,24 +821,26 @@ if (
          * =====================================================
          */
 
-        $stmt_timeout = $pdo_qrup->prepare("
-            SELECT
-                id AS uzv_id,
-                user_id,
-                terefi,
-                doyuse_qosuldu,
-                doyus_bildirisi,
-                son_can,
-                son_doyuse_qosulma_vaxti,
-                giris_sirasi
-            FROM qrup_uzvleri
-            WHERE qrup_id = ?
-              AND status = 1
-              AND doyuse_qosuldu = 1
-              AND son_doyuse_qosulma_vaxti IS NOT NULL
-            ORDER BY giris_sirasi ASC, id ASC
-        ");
-
+  $stmt_timeout = $pdo_qrup->prepare("
+    SELECT
+        qu.id AS uzv_id,
+        qu.user_id,
+        qu.terefi,
+        qu.doyuse_qosuldu,
+        qu.doyus_bildirisi,
+        qu.son_can,
+        qu.son_doyuse_qosulma_vaxti,
+        op.can AS max_can,
+        qu.giris_sirasi
+    FROM qrup_uzvleri qu
+    LEFT JOIN klannn.oyuncu_parametrleri op
+        ON op.user_id = qu.user_id
+    WHERE qu.qrup_id = ?
+      AND qu.status = 1
+      AND qu.doyuse_qosuldu = 1
+      AND qu.son_doyuse_qosulma_vaxti IS NOT NULL
+    ORDER BY qu.giris_sirasi ASC, qu.id ASC
+");
         $stmt_timeout->execute([
             $qrup_id
         ]);
@@ -1044,19 +1046,21 @@ $reqib_teref =
     ($timeout_teref === 1) ? 2 : 1;
 
 $stmt_reqib_aktiv = $pdo_qrup->prepare("
-   SELECT
-    user_id,
-    terefi,
-    doyuse_qosuldu,
-    son_can,
-    son_doyuse_qosulma_vaxti,
-    can
-    FROM qrup_uzvleri
-    WHERE qrup_id = ?
-      AND terefi = ?
-      AND status = 1
-      AND doyuse_qosuldu = 1
-    ORDER BY giris_sirasi ASC, id ASC
+    SELECT
+        qu.user_id,
+        qu.terefi,
+        qu.doyuse_qosuldu,
+        qu.son_can,
+        qu.son_doyuse_qosulma_vaxti,
+        op.can AS max_can
+    FROM qrup_uzvleri qu
+    LEFT JOIN klannn.oyuncu_parametrleri op
+        ON op.user_id = qu.user_id
+    WHERE qu.qrup_id = ?
+      AND qu.terefi = ?
+      AND qu.status = 1
+      AND qu.doyuse_qosuldu = 1
+    ORDER BY qu.giris_sirasi ASC, qu.id ASC
     LIMIT 1
 ");
 
