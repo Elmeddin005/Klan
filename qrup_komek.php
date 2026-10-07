@@ -2230,20 +2230,24 @@ if (
      * Aktiv döyüş varsa,
      * raundun başlanğıc vaxtını götürürük.
      */
-    $stmt_aktiv_vaxt = $pdo_qrup->prepare("
-        SELECT
-            novbe_baslama_tarixi
-        FROM qrup_doyusleri
-        WHERE qrup_id = :qrup_id
-          AND bitdi = 0
-          AND novbe_baslama_tarixi IS NOT NULL
-        ORDER BY id DESC
-        LIMIT 1
-    ");
-
+$stmt_aktiv_vaxt = $pdo_qrup->prepare("
+    SELECT
+        novbe_baslama_tarixi
+    FROM qrup_doyusleri
+    WHERE qrup_id = :qrup_id
+      AND bitdi = 0
+      AND novbe_baslama_tarixi IS NOT NULL
+      AND (
+          oyuncu1_id = :user_id
+          OR oyuncu2_id = :user_id
+      )
+    ORDER BY id DESC
+    LIMIT 1
+");
     $stmt_aktiv_vaxt->execute([
-        ':qrup_id' => $qrup_id
-    ]);
+    ':qrup_id' => $qrup_id,
+    ':user_id' => $my_id
+]);
 
     $aktiv_doyus_vaxt =
         $stmt_aktiv_vaxt->fetch(PDO::FETCH_ASSOC);
