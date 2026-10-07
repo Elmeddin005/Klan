@@ -1181,7 +1181,6 @@ $menim_canli_say =
 
 $reqib_canli_say =
     $canli_saylar[(int)$reqib_teref] ?? 0;
-Yəni struktur belə olacaq:
 
 $timeout_sonuncudur =
     !$timeout_teref_novbeti;
@@ -1316,9 +1315,8 @@ if (
     $komanda_qalib_var = true;
 }
 if (
-    $timeout_sonuncudur &&
-    $reqib_sonuncudur &&
-    ($hucum_edib xor $reqib_hucum_edib)
+    $menim_canli_say === 0 &&
+    $reqib_canli_say > 0
 ) {
     if ($hucum_edib) {
 
