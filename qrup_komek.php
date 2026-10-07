@@ -551,11 +551,12 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
                       AND terefi = ?
                       AND status = 1
                       AND doyuse_qosuldu = 0
-                      AND user_id <> ?
-                      AND (
-                          son_can IS NULL
-                          OR son_can > 0
-                      )
+                      AND doyus_bildirisi != 2
+                       AND user_id <> ?
+                        AND (
+                      son_can IS NULL
+                     OR son_can > 0
+                        )
                     ORDER BY
                         giris_sirasi ASC,
                         id ASC
