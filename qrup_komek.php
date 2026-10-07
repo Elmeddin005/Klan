@@ -1356,37 +1356,7 @@ $hec_hece_canlar = [
             : (int)$reqib_aktiv['max_can']
     )
 ];
-/*
- * Bu iki oyunçu üçün artıq nəticə yaradılıbsa,
- * yenidən INSERT etmə.
- */
-$stmt_hec_hece_yoxla = $pdo_qrup->prepare("
-    SELECT id
-    FROM qrup_doyusleri
-    WHERE qrup_id = ?
-      AND (
-          (oyuncu1_id = ? AND oyuncu2_id = ?)
-          OR
-          (oyuncu1_id = ? AND oyuncu2_id = ?)
-      )
-      AND bitdi = 1
-    LIMIT 1
-");
 
-$stmt_hec_hece_yoxla->execute([
-    $qrup_id,
-    $timeout_user_id,
-    $reqib_user_id,
-    $reqib_user_id,
-    $timeout_user_id
-]);
-
-$hec_hece_artiq_var =
-    $stmt_hec_hece_yoxla->fetchColumn();
-
-if ($hec_hece_artiq_var) {
-    continue;
-}
      $stmt_hec_hece = $pdo_qrup->prepare("
     UPDATE qrup_doyusleri
     SET
