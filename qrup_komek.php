@@ -1318,17 +1318,8 @@ if (
     $menim_canli_say === 0 &&
     $reqib_canli_say > 0
 ) {
-    if ($hucum_edib) {
-
-        $qalib_id = (int)$tr['user_id'];
-        $meglub_id = (int)$reqib_user_id;
-
-    } else {
-
-        $qalib_id = (int)$reqib_user_id;
-        $meglub_id = (int)$tr['user_id'];
-    }
-
+    $qalib_id = (int)$reqib_user_id;
+    $meglub_id = (int)$tr['user_id'];
     /*
      * Mövcud qrup_doyusleri sətrini bitir.
      * Yeni INSERT edilmir.
