@@ -1122,6 +1122,10 @@ AND (
     OR doyus_bildirisi != 2
 )
 AND (
+    doyuse_qosuldu = 1
+    OR son_doyuse_qosulma_vaxti IS NULL
+)
+AND (
     son_can IS NULL
     OR son_can > 0
 )
@@ -3207,7 +3211,6 @@ if (
     $timeout_xetti = true;
 }
 
-
 if (
     isset($uzv['bitdi']) &&
     (int)$uzv['bitdi'] === 0 &&
@@ -3461,7 +3464,6 @@ if (
 ) {
     $timeout_xetti = true;
 }
-
 
 if (
     isset($uzv['bitdi']) &&
