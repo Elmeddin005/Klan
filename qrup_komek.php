@@ -821,7 +821,7 @@ if (
          * =====================================================
          */
 
-  $stmt_timeout = $pdo_qrup->prepare("
+$stmt_timeout = $pdo_qrup->prepare("
     SELECT
         qu.id AS uzv_id,
         qu.user_id,
