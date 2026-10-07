@@ -1137,7 +1137,7 @@ $timeout_teref_novbeti =
 
 $timeout_sonuncudur =
     !$timeout_teref_novbeti;
-    /*
+  /*
  * =================================================
  * RƏQİB TƏRƏFİN AKTİV OYUNÇUSU SONUNCUDUR?
  * =================================================
@@ -1145,15 +1145,10 @@ $timeout_sonuncudur =
 
 $reqib_sonuncudur = false;
 
-/*
- * Rəqib aktivdirsə, onun tərəfdə
- * bundan sonra başqa sağlam oyunçu varmı?
- */
 if ($reqib_aktiv) {
 
     $stmt_reqib_novbeti = $pdo_qrup->prepare("
-        SELECT
-            user_id
+        SELECT user_id
         FROM qrup_uzvleri
         WHERE qrup_id = ?
           AND terefi = ?
@@ -1163,9 +1158,7 @@ if ($reqib_aktiv) {
               son_can IS NULL
               OR son_can > 0
           )
-        ORDER BY
-            giris_sirasi ASC,
-            id ASC
+        ORDER BY giris_sirasi ASC, id ASC
         LIMIT 1
     ");
 
@@ -1184,11 +1177,8 @@ if ($reqib_aktiv) {
 } else {
 
     /*
-     * Rəqib artıq timeout olub və döyüşdən çıxıbsa,
-     * onun ID-sini aktiv döyüş sətrindən tapırıq.
-     *
-     * Beləliklə ikinci sonuncu oyunçu timeout olanda
-     * rəqibi artıq aktiv olmadığı üçün itirmirik.
+     * Rəqib artıq timeout olubsa,
+     * cari döyüş sətrindən rəqibi müəyyən et.
      */
     if ($hucum) {
 
@@ -1198,6 +1188,7 @@ if ($reqib_aktiv) {
         ) {
             $reqib_user_id =
                 (int)$hucum['oyuncu1_id'];
+
         } elseif (
             (int)$hucum['oyuncu2_id'] !==
             $timeout_user_id
@@ -1206,13 +1197,8 @@ if ($reqib_aktiv) {
                 (int)$hucum['oyuncu2_id'];
         }
 
-        /*
-         * Rəqib tərəfdə bundan başqa
-         * sağlam oyunçu qalıbmı?
-         */
         $stmt_reqib_novbeti = $pdo_qrup->prepare("
-            SELECT
-                user_id
+            SELECT user_id
             FROM qrup_uzvleri
             WHERE qrup_id = ?
               AND terefi = ?
@@ -1222,9 +1208,7 @@ if ($reqib_aktiv) {
                   son_can IS NULL
                   OR son_can > 0
               )
-            ORDER BY
-                giris_sirasi ASC,
-                id ASC
+            ORDER BY giris_sirasi ASC, id ASC
             LIMIT 1
         ");
 
@@ -1443,8 +1427,9 @@ break;
      * Rəqib hücum edib, timeout olan sonuncudur:
      * RƏQİB QALİBDİR.
      */
-   if (
+if (
     $timeout_sonuncudur &&
+    $reqib_sonuncudur &&
     $reqib_hucum_edib
 ) {
 
@@ -1622,6 +1607,10 @@ $stmt_cixar->execute([
                   AND terefi = ?
                   AND status = 1
                   AND doyuse_qosuldu = 0
+                  AND (
+    doyus_bildirisi IS NULL
+    OR doyus_bildirisi != 2
+)
                   AND user_id != ?
                   AND (
                       son_can IS NULL
