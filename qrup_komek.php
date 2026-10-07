@@ -442,7 +442,7 @@ if ($timeout_doyus) {
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >= 59
+        (time() - $timeout_baslama) >= 10
     ) {
 
         /*
@@ -925,7 +925,7 @@ if (
      * Hələ 59 saniyə tamam olmayıb.
      */
     if (
-        (time() - $baslama) < 59
+        (time() - $baslama) < 10
     ) {
         continue;
     }
@@ -945,7 +945,18 @@ if (
              * vaxtından əvvəl olmamalıdır.
              * =================================================
              */
-               $stmt_hucum = $pdo_qrup->prepare("
+ /*
+ * =================================================
+ * AKTİV DÖYÜŞ SƏTRİNİ TAP
+ *
+ * İlk döyüşdə qrup_doyusleri hələ yoxdursa:
+ * zərbə vurulmayıb kimi qəbul edilir.
+ * =================================================
+ */
+
+$hucum = null;
+
+$stmt_hucum = $pdo_qrup->prepare("
     SELECT
         oyuncu1_id,
         oyuncu2_id,
@@ -954,29 +965,27 @@ if (
         oyuncu1_can,
         oyuncu2_can,
         novbe_baslama_tarixi
-                FROM qrup_doyusleri
-                WHERE qrup_id = ?
-                  AND bitdi = 0
-                  AND novbe_baslama_tarixi IS NOT NULL
-                  AND novbe_baslama_tarixi >= ?
-                  AND (
-                      oyuncu1_id = ?
-                      OR oyuncu2_id = ?
-                  )
-                ORDER BY id DESC
-                LIMIT 1
-            ");
+    FROM qrup_doyusleri
+    WHERE qrup_id = ?
+      AND bitdi = 0
+      AND novbe_baslama_tarixi IS NOT NULL
+      AND novbe_baslama_tarixi >= ?
+      AND (
+          oyuncu1_id = ?
+          OR oyuncu2_id = ?
+      )
+    ORDER BY id DESC
+    LIMIT 1
+");
 
-         $stmt_hucum->execute([
+$stmt_hucum->execute([
     $qrup_id,
     date('Y-m-d H:i:s', $baslama),
     (int)$tr['user_id'],
     (int)$tr['user_id']
 ]);
 
-            $hucum = $stmt_hucum->fetch(PDO::FETCH_ASSOC);
-
-
+$hucum = $stmt_hucum->fetch(PDO::FETCH_ASSOC);
             /*
              * =================================================
              * 4. BU OYUNÇU ZƏRBƏ VURUBMU?
@@ -1163,13 +1172,77 @@ if ($reqib_aktiv) {
     $reqib_sonuncudur =
         !$reqib_novbeti;
 }
+
+if (
+    $hucum_edib xor $reqib_hucum_edib
+) {
+
+    if ($hucum_edib) {
+        $qalib_id = $tr['user_id'];
+        $meglub_id = $reqib_user_id;
+    } else {
+        $qalib_id = $reqib_user_id;
+        $meglub_id = $tr['user_id'];
+    }
+
+    $stmt_timeout_qalib = $pdo_qrup->prepare("
+        INSERT INTO qrup_doyusleri
+        (
+            qrup_id,
+            oyuncu1_id,
+            oyuncu2_id,
+            qalib_id,
+            bitdi,
+            bitdi_qalib,
+            bitdi_meglub,
+            hec_hece,
+            novbe_baslama_tarixi
+        )
+        VALUES
+        (
+            ?,
+            ?,
+            ?,
+            ?,
+            1,
+            ?,
+            ?,
+            0,
+            NOW()
+        )
+    ");
+
+    $stmt_timeout_qalib->execute([
+        $qrup_id,
+        $tr['user_id'],
+        $reqib_user_id,
+        $qalib_id,
+        $qalib_id,
+        $meglub_id
+    ]);
+
+    $stmt_meglub = $pdo_qrup->prepare("
+        UPDATE qrup_uzvleri
+        SET
+            doyuse_qosuldu = 0,
+            doyus_bildirisi = 2
+        WHERE qrup_id = ?
+          AND user_id = ?
+          AND status = 1
+    ");
+
+    $stmt_meglub->execute([
+        $qrup_id,
+        $meglub_id
+    ]);
+}
 /*
  * =================================================
  * TIMEOUT NƏTİCƏSİ
  * =================================================
  */
 
-if ($timeout_sonuncudur) {
+if ($timeout_sonuncudur && $reqib_sonuncudur) {
 
     /*
      * Rəqib də sonuncudur və hücum etməyib:
@@ -1180,25 +1253,13 @@ if ($timeout_sonuncudur) {
         !$reqib_hucum_edib &&
         !$hucum_edib
     ) {
-                $stmt_hec_hece_can = $pdo_qrup->prepare("
-            SELECT
-                user_id,
-                can
-            FROM klannn.oyuncu_parametrləri
-            WHERE user_id IN (?, ?)
-        ");
+              $timeout_son_can = (int)($tr['son_can'] ?? 0);
+$reqib_son_can   = (int)($reqib_aktiv['son_can'] ?? 0);
 
-        $stmt_hec_hece_can->execute([
-            $timeout_user_id,
-            $reqib_user_id
-        ]);
-
-        $hec_hece_canlar = [];
-
-        while ($can_row = $stmt_hec_hece_can->fetch(PDO::FETCH_ASSOC)) {
-            $hec_hece_canlar[(int)$can_row['user_id']] =
-                (int)$ilkin_can + (int)$can_row['can'];
-        }
+$hec_hece_canlar = [
+    $timeout_user_id => $timeout_son_can,
+    $reqib_user_id   => $reqib_son_can
+];
 
         $stmt_hec_hece = $pdo_qrup->prepare("
             INSERT INTO qrup_doyusleri
@@ -1226,7 +1287,7 @@ if ($timeout_sonuncudur) {
     1,
     NULL,
     NULL,
-    1,
+    0,
     NOW()
 )
         ");
@@ -1242,20 +1303,21 @@ if ($timeout_sonuncudur) {
         /*
          * Bu timeout oyunçusunu çıxart.
          */
-        $stmt_cixar = $pdo_qrup->prepare("
-            UPDATE qrup_uzvleri
-            SET
-                doyuse_qosuldu = 0,
-                doyus_bildirisi = 2
-            WHERE id = ?
-              AND qrup_id = ?
-              AND status = 1
-        ");
+       $stmt_cixar = $pdo_qrup->prepare("
+    UPDATE qrup_uzvleri
+    SET
+        doyuse_qosuldu = 0,
+        doyus_bildirisi = 2
+    WHERE qrup_id = ?
+      AND user_id IN (?, ?)
+      AND status = 1
+");
 
-        $stmt_cixar->execute([
-            (int)$tr['uzv_id'],
-            $qrup_id
-        ]);
+$stmt_cixar->execute([
+    $qrup_id,
+    $timeout_user_id,
+    $reqib_user_id
+]);
 
         $timeout_edenler[] =
             $timeout_user_id;
@@ -1386,21 +1448,21 @@ $stmt_son_can->execute([
     $reqib_user_id
 ]);
 
-        $stmt_cixar = $pdo_qrup->prepare("
-            UPDATE qrup_uzvleri
-            SET
-                doyuse_qosuldu = 0,
-                doyus_bildirisi = 2
-            WHERE id = ?
-              AND qrup_id = ?
-              AND status = 1
-        ");
+       $stmt_cixar = $pdo_qrup->prepare("
+    UPDATE qrup_uzvleri
+    SET
+        doyuse_qosuldu = 0,
+        doyus_bildirisi = 2
+    WHERE qrup_id = ?
+      AND user_id IN (?, ?)
+      AND status = 1
+");
 
-        $stmt_cixar->execute([
-            (int)$tr['uzv_id'],
-            $qrup_id
-        ]);
-
+$stmt_cixar->execute([
+    $qrup_id,
+    $timeout_user_id,
+    $reqib_user_id
+]);
         $timeout_edenler[] =
             $timeout_user_id;
 
@@ -2104,7 +2166,7 @@ $qrup_netice = $stmt_netice->fetch(PDO::FETCH_ASSOC);
    TIMEOUT OLAN OYUNÇU HƏMİŞƏ 0-DA QALIR
 ========================================================= */
 
-$zerbe_qalan_saniye = 59;
+$zerbe_qalan_saniye = 10;
 
 $baslama_vaxti = null;
 
@@ -2174,7 +2236,7 @@ if (
         if ($baslama !== false) {
 
             $zerbe_qalan_saniye =
-                59 - (time() - $baslama);
+                10 - (time() - $baslama);
         }
     }
 
@@ -2182,7 +2244,7 @@ if (
         max(
             0,
             min(
-                59,
+                10,
                 (int)$zerbe_qalan_saniye
             )
         );
@@ -2999,7 +3061,7 @@ if (
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >= 59
+        (time() - $timeout_baslama) >= 10
     ) {
 
         if (
@@ -3254,7 +3316,7 @@ if (
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >= 59
+        (time() - $timeout_baslama) >= 10
     ) {
 
         if (
