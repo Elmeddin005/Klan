@@ -1145,6 +1145,10 @@ $timeout_sonuncudur =
 
 $reqib_sonuncudur = false;
 
+/*
+ * Rəqib aktivdirsə, onun tərəfdə
+ * bundan sonra başqa sağlam oyunçu varmı?
+ */
 if ($reqib_aktiv) {
 
     $stmt_reqib_novbeti = $pdo_qrup->prepare("
@@ -1176,8 +1180,67 @@ if ($reqib_aktiv) {
 
     $reqib_sonuncudur =
         !$reqib_novbeti;
-}
 
+} else {
+
+    /*
+     * Rəqib artıq timeout olub və döyüşdən çıxıbsa,
+     * onun ID-sini aktiv döyüş sətrindən tapırıq.
+     *
+     * Beləliklə ikinci sonuncu oyunçu timeout olanda
+     * rəqibi artıq aktiv olmadığı üçün itirmirik.
+     */
+    if ($hucum) {
+
+        if (
+            (int)$hucum['oyuncu1_id'] !==
+            $timeout_user_id
+        ) {
+            $reqib_user_id =
+                (int)$hucum['oyuncu1_id'];
+        } elseif (
+            (int)$hucum['oyuncu2_id'] !==
+            $timeout_user_id
+        ) {
+            $reqib_user_id =
+                (int)$hucum['oyuncu2_id'];
+        }
+
+        /*
+         * Rəqib tərəfdə bundan başqa
+         * sağlam oyunçu qalıbmı?
+         */
+        $stmt_reqib_novbeti = $pdo_qrup->prepare("
+            SELECT
+                user_id
+            FROM qrup_uzvleri
+            WHERE qrup_id = ?
+              AND terefi = ?
+              AND status = 1
+              AND user_id != ?
+              AND (
+                  son_can IS NULL
+                  OR son_can > 0
+              )
+            ORDER BY
+                giris_sirasi ASC,
+                id ASC
+            LIMIT 1
+        ");
+
+        $stmt_reqib_novbeti->execute([
+            $qrup_id,
+            $reqib_teref,
+            $reqib_user_id
+        ]);
+
+        $reqib_novbeti =
+            $stmt_reqib_novbeti->fetch(PDO::FETCH_ASSOC);
+
+        $reqib_sonuncudur =
+            !$reqib_novbeti;
+    }
+}
 /*
  * =================================================
  * QALİB / MƏĞLUB NƏTİCƏSİ
@@ -1193,9 +1256,9 @@ if ($reqib_aktiv) {
 
 if (
     $timeout_sonuncudur &&
+    $reqib_sonuncudur &&
     ($hucum_edib xor $reqib_hucum_edib)
 ) {
-
     if ($hucum_edib) {
 
         $qalib_id = (int)$tr['user_id'];
