@@ -1380,9 +1380,10 @@ break;
      * Rəqib hücum edib, timeout olan sonuncudur:
      * RƏQİB QALİBDİR.
      */
-    if (
-        $reqib_hucum_edib
-    ) {
+   if (
+    $timeout_sonuncudur &&
+    $reqib_hucum_edib
+) {
 
         $stmt_qalib = $pdo_qrup->prepare("
             INSERT INTO qrup_doyusleri
