@@ -1159,10 +1159,14 @@ if ($reqib_aktiv) {
           AND terefi = ?
           AND status = 1
           AND user_id != ?
-          AND (
-              son_can IS NULL
-              OR son_can > 0
-          )
+AND (
+    doyus_bildirisi IS NULL
+    OR doyus_bildirisi != 2
+)
+AND (
+    son_can IS NULL
+    OR son_can > 0
+)
         ORDER BY giris_sirasi ASC, id ASC
         LIMIT 1
     ");
@@ -1208,11 +1212,15 @@ if ($reqib_aktiv) {
             WHERE qrup_id = ?
               AND terefi = ?
               AND status = 1
-              AND user_id != ?
-              AND (
-                  son_can IS NULL
-                  OR son_can > 0
-              )
+             AND user_id != ?
+AND (
+    doyus_bildirisi IS NULL
+    OR doyus_bildirisi != 2
+)
+AND (
+    son_can IS NULL
+    OR son_can > 0
+)
             ORDER BY giris_sirasi ASC, id ASC
             LIMIT 1
         ");
