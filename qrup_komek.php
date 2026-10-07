@@ -1117,18 +1117,14 @@ $stmt_timeout_novbeti = $pdo_qrup->prepare("
       AND terefi = ?
       AND status = 1
       AND user_id != ?
-AND (
-    doyus_bildirisi IS NULL
-    OR doyus_bildirisi != 2
-)
-AND (
-    doyuse_qosuldu = 1
-    OR son_doyuse_qosulma_vaxti IS NULL
-)
-AND (
-    son_can IS NULL
-    OR son_can > 0
-)
+      AND (
+          doyus_bildirisi IS NULL
+          OR doyus_bildirisi != 2
+      )
+      AND (
+          son_can IS NULL
+          OR son_can > 0
+      )
     ORDER BY
         giris_sirasi ASC,
         id ASC
@@ -1146,6 +1142,50 @@ $timeout_teref_novbeti =
 
 $timeout_sonuncudur =
     !$timeout_teref_novbeti;
+
+    /*
+ * HƏR İKİ TƏRƏFDƏ CANLI OYUNÇULARI SAY
+ */
+
+$stmt_canli_teref = $pdo_qrup->prepare("
+    SELECT
+        terefi,
+        COUNT(*) AS say
+    FROM qrup_uzvleri
+    WHERE qrup_id = ?
+      AND status = 1
+      AND (
+          son_can IS NULL
+          OR son_can > 0
+      )
+      AND (
+          doyus_bildirisi IS NULL
+          OR doyus_bildirisi != 2
+      )
+    GROUP BY terefi
+");
+
+$stmt_canli_teref->execute([
+    $qrup_id
+]);
+
+$canli_saylar = [];
+
+while ($canli = $stmt_canli_teref->fetch(PDO::FETCH_ASSOC)) {
+    $canli_saylar[(int)$canli['terefi']] =
+        (int)$canli['say'];
+}
+
+$menim_canli_say =
+    $canli_saylar[(int)$timeout_teref] ?? 0;
+
+$reqib_canli_say =
+    $canli_saylar[(int)$reqib_teref] ?? 0;
+Yəni struktur belə olacaq:
+
+$timeout_sonuncudur =
+    !$timeout_teref_novbeti;
+
   /*
  * =================================================
  * RƏQİB TƏRƏFİN AKTİV OYUNÇUSU SONUNCUDUR?
@@ -1254,7 +1294,27 @@ AND (
  *     vuran qalib olur.
  * =================================================
  */
+/*
+ * KOMANDA NƏTİCƏSİ:
+ * BİR TƏRƏF TAM BİTİB, DİGƏR TƏRƏFDƏ CANLI OYUNÇU VARSA
+ * CANLI OYUNÇUNUN TƏRƏFİ QALİBDİR.
+ */
 
+$komanda_qalib_var = false;
+
+if (
+    $menim_canli_say === 0 &&
+    $reqib_canli_say > 0
+) {
+    $komanda_qalib_var = true;
+}
+
+if (
+    $reqib_canli_say === 0 &&
+    $menim_canli_say > 0
+) {
+    $komanda_qalib_var = true;
+}
 if (
     $timeout_sonuncudur &&
     $reqib_sonuncudur &&
