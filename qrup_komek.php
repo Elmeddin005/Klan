@@ -1254,9 +1254,18 @@ if ($timeout_sonuncudur && $reqib_sonuncudur) {
         !$reqib_hucum_edib &&
         !$hucum_edib
     ) {
-              $hec_hece_canlar = [
-    $timeout_user_id => (int)($tr['son_can'] ?? $tr['can'] ?? 0),
-    $reqib_user_id   => (int)($reqib_aktiv['son_can'] ?? $reqib_aktiv['can'] ?? 0)
+$hec_hece_canlar = [
+    $timeout_user_id => (
+        $tr['son_can'] !== null
+            ? (int)$tr['son_can']
+            : (int)$tr['can']
+    ),
+
+    $reqib_user_id => (
+        $reqib_aktiv['son_can'] !== null
+            ? (int)$reqib_aktiv['son_can']
+            : (int)$reqib_aktiv['can']
+    )
 ];
 
 /*
