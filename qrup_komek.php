@@ -1221,20 +1221,27 @@ if (
         $meglub_id
     ]);
 
-    $stmt_meglub = $pdo_qrup->prepare("
-        UPDATE qrup_uzvleri
-        SET
-            doyuse_qosuldu = 0,
-            doyus_bildirisi = 2
-        WHERE qrup_id = ?
-          AND user_id = ?
-          AND status = 1
-    ");
+$stmt_meglub = $pdo_qrup->prepare("
+    UPDATE qrup_uzvleri
+    SET
+        doyuse_qosuldu = 0,
+        doyus_bildirisi = CASE
+            WHEN user_id = ? THEN 2
+            WHEN user_id = ? THEN 0
+            ELSE doyus_bildirisi
+        END
+    WHERE qrup_id = ?
+      AND user_id IN (?, ?)
+      AND status = 1
+");
 
-    $stmt_meglub->execute([
-        $qrup_id,
-        $meglub_id
-    ]);
+$stmt_meglub->execute([
+    $meglub_id,
+    $qalib_id,
+    $qrup_id,
+    $meglub_id,
+    $qalib_id
+]);
 }
 /*
  * =================================================
@@ -1261,6 +1268,37 @@ $hec_hece_canlar = [
     $reqib_user_id   => $reqib_son_can
 ];
 
+/*
+ * Bu iki oyunçu üçün artıq nəticə yaradılıbsa,
+ * yenidən INSERT etmə.
+ */
+$stmt_hec_hece_yoxla = $pdo_qrup->prepare("
+    SELECT id
+    FROM qrup_doyusleri
+    WHERE qrup_id = ?
+      AND (
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+          OR
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+      )
+      AND bitdi = 1
+    LIMIT 1
+");
+
+$stmt_hec_hece_yoxla->execute([
+    $qrup_id,
+    $timeout_user_id,
+    $reqib_user_id,
+    $reqib_user_id,
+    $timeout_user_id
+]);
+
+$hec_hece_artiq_var =
+    $stmt_hec_hece_yoxla->fetchColumn();
+
+if ($hec_hece_artiq_var) {
+    continue;
+}
         $stmt_hec_hece = $pdo_qrup->prepare("
             INSERT INTO qrup_doyusleri
             (
@@ -1300,10 +1338,7 @@ $hec_hece_canlar = [
     $hec_hece_canlar[$reqib_user_id]
 ]);
 
-        /*
-         * Bu timeout oyunçusunu çıxart.
-         */
-       $stmt_cixar = $pdo_qrup->prepare("
+  $stmt_cixar = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
         doyuse_qosuldu = 0,
@@ -1311,6 +1346,7 @@ $hec_hece_canlar = [
     WHERE qrup_id = ?
       AND user_id IN (?, ?)
       AND status = 1
+      AND doyuse_qosuldu = 1
 ");
 
 $stmt_cixar->execute([
@@ -1319,11 +1355,11 @@ $stmt_cixar->execute([
     $reqib_user_id
 ]);
 
-        $timeout_edenler[] =
-            $timeout_user_id;
+$timeout_edenler[] = $timeout_user_id;
+$timeout_edenler[] = $reqib_user_id;
 
-        continue;
-    }
+break;
+  }
 
     /*
      * Rəqib hücum edib, timeout olan sonuncudur:
@@ -1359,7 +1395,7 @@ $stmt_cixar->execute([
                 1,
                 NULL,
                 NULL,
-                1,
+                0,
                 NOW()
             )
         ");
