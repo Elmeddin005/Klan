@@ -3917,17 +3917,11 @@ if (
     cavab.ok &&
     cavab.reload === 1
 ) {
-
-    /*
-     * Nəticə artıq serverdə hesablandı.
-     * Səhifəni avtomatik yeniləmə.
-     *
-     * İstifadəçi özü F5 / Refresh edəndə
-     * nəticə ekranda görünəcək.
-     */
     clearInterval(timeoutInterval);
 
     timeoutYoxlanir = true;
+
+    window.location.reload();
 
     return;
 }
