@@ -1793,21 +1793,24 @@ if ($son_doyuscu) {
        HƏMİN TƏRƏFDƏKİ ƏVVƏLKİ DÖYÜŞÇİNİ ÇIXAR
     ----------------------------------------------------- */
 
-    $stmt_evvelki = $pdo_qrup->prepare("
-        UPDATE qrup_uzvleri
+$stmt_evvelki = $pdo_qrup->prepare("
+    UPDATE qrup_uzvleri
 
-        SET
-            doyuse_qosuldu = 0,
-            doyus_bildirisi = 0
+    SET
+        doyuse_qosuldu = 0,
+        doyus_bildirisi = CASE
+            WHEN doyus_bildirisi = 2 THEN 2
+            ELSE 0
+        END
 
-        WHERE qrup_id = :qrup_id
+    WHERE qrup_id = :qrup_id
 
-          AND terefi = :teref
+      AND terefi = :teref
 
-          AND status = 1
+      AND status = 1
 
-          AND doyuse_qosuldu = 1
-    ");
+      AND doyuse_qosuldu = 1
+");
 
     $stmt_evvelki->execute([
 
