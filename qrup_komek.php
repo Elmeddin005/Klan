@@ -1375,7 +1375,7 @@ $hec_hece_artiq_var =
 if ($hec_hece_artiq_var) {
     continue;
 }
-      $stmt_hec_hece = $pdo_qrup->prepare("
+     $stmt_hec_hece = $pdo_qrup->prepare("
     UPDATE qrup_doyusleri
     SET
         oyuncu1_can = ?,
@@ -1385,15 +1385,15 @@ if ($hec_hece_artiq_var) {
         bitdi_qalib = NULL,
         bitdi_meglub = NULL,
         hec_hece = 1
-  WHERE qrup_id = ?
-  AND (
-      (oyuncu1_id = ? AND oyuncu2_id = ?)
-      OR
-      (oyuncu1_id = ? AND oyuncu2_id = ?)
-  )
-  AND bitdi = 0
-ORDER BY id DESC
-LIMIT 1
+    WHERE qrup_id = ?
+      AND bitdi = 0
+      AND (
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+          OR
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+      )
+    ORDER BY id DESC
+    LIMIT 1
 ");
 
 $stmt_hec_hece->execute([
