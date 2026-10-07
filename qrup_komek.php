@@ -1325,7 +1325,7 @@ if ($hec_hece_artiq_var) {
     1,
     NULL,
     NULL,
-    0,
+    1,
     NOW()
 )
         ");
