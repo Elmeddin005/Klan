@@ -1185,42 +1185,35 @@ if (
         $meglub_id = $tr['user_id'];
     }
 
-    $stmt_timeout_qalib = $pdo_qrup->prepare("
-        INSERT INTO qrup_doyusleri
-        (
-            qrup_id,
-            oyuncu1_id,
-            oyuncu2_id,
-            qalib_id,
-            bitdi,
-            bitdi_qalib,
-            bitdi_meglub,
-            hec_hece,
-            novbe_baslama_tarixi
-        )
-        VALUES
-        (
-            ?,
-            ?,
-            ?,
-            ?,
-            1,
-            ?,
-            ?,
-            0,
-            NOW()
-        )
-    ");
+   $stmt_timeout_qalib = $pdo_qrup->prepare("
+    UPDATE qrup_doyusleri
+    SET
+        qalib_id = ?,
+        bitdi = 1,
+        bitdi_qalib = ?,
+        bitdi_meglub = ?,
+        hec_hece = 0
+    WHERE qrup_id = ?
+      AND bitdi = 0
+      AND (
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+          OR
+          (oyuncu1_id = ? AND oyuncu2_id = ?)
+      )
+    ORDER BY id DESC
+    LIMIT 1
+");
 
-    $stmt_timeout_qalib->execute([
-        $qrup_id,
-        $tr['user_id'],
-        $reqib_user_id,
-        $qalib_id,
-        $qalib_id,
-        $meglub_id
-    ]);
-
+$stmt_timeout_qalib->execute([
+    $qalib_id,
+    $qalib_id,
+    $meglub_id,
+    $qrup_id,
+    $tr['user_id'],
+    $reqib_user_id,
+    $reqib_user_id,
+    $tr['user_id']
+]);
 $stmt_meglub = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
