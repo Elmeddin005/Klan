@@ -1262,16 +1262,15 @@ $hec_hece_canlar = [
     $timeout_user_id => (
         $tr['son_can'] !== null
             ? (int)$tr['son_can']
-            : (int)$tr['can']
+            : (int)$tr['max_can']
     ),
 
     $reqib_user_id => (
         $reqib_aktiv['son_can'] !== null
             ? (int)$reqib_aktiv['son_can']
-            : (int)$reqib_aktiv['can']
+            : (int)$reqib_aktiv['max_can']
     )
 ];
-
 /*
  * Bu iki oyunçu üçün artıq nəticə yaradılıbsa,
  * yenidən INSERT etmə.
