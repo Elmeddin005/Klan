@@ -2770,6 +2770,25 @@ height:1px;
 <br>
 <br>
 <?php endif; ?>
+<?php if ($menim_qrup_neticesi === 'hec_hece'): ?>
+
+<div class="error">
+    <b>HEÇ-HEÇƏ!</b><br/>
+    Hər iki tərəf zərbə vurmadı.
+</div>
+
+<?php endif; ?>
+Yəni sıra belə olacaq:
+
+<?php if ($menim_qrup_neticesi === 'hec_hece'): ?>
+
+<div class="error">
+    <b>HEÇ-HEÇƏ!</b><br/>
+    Hər iki tərəf zərbə vurmadı.
+</div>
+
+<?php endif; ?>
+
 <?php if ($menim_qrup_neticesi === 'qalib'): ?>
 <!-- =====================================================
      DÖYÜŞ NƏTİCƏSİ — QALİB
