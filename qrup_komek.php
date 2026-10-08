@@ -442,7 +442,7 @@ if ($timeout_doyus) {
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >=8
+        (time() - $timeout_baslama) >=15
     ) {
 
         /*
@@ -963,7 +963,7 @@ $stmt_timeout = $pdo_qrup->prepare("
      * Hələ 59 saniyə tamam olmayıb.
      */
     if (
-        (time() - $baslama) < 8
+        (time() - $baslama) < 15
     ) {
         continue;
     }
@@ -2532,7 +2532,7 @@ $qrup_netice = $stmt_netice->fetch(PDO::FETCH_ASSOC);
    TIMEOUT OLAN OYUNÇU HƏMİŞƏ 0-DA QALIR
 ========================================================= */
 
-$zerbe_qalan_saniye = 8;
+$zerbe_qalan_saniye = 15;
 
 $baslama_vaxti = null;
 
@@ -2549,7 +2549,7 @@ if (
      * TIMEOUT OLAN OYUNÇU:
      * 0 saniyədə qalır.
      */
-    $zerbe_qalan_saniye = 0;
+    $zerbe_qalan_saniye = 15;
 
 } else {
 
@@ -2606,7 +2606,7 @@ $stmt_aktiv_vaxt = $pdo_qrup->prepare("
         if ($baslama !== false) {
 
             $zerbe_qalan_saniye =
-                8 - (time() - $baslama);
+                15 - (time() - $baslama);
         }
     }
 
@@ -2614,7 +2614,7 @@ $stmt_aktiv_vaxt = $pdo_qrup->prepare("
         max(
             0,
             min(
-                8,
+                15,
                 (int)$zerbe_qalan_saniye
             )
         );
@@ -3431,7 +3431,7 @@ if (
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >= 8
+        (time() - $timeout_baslama) >= 15
     ) {
 
         if (
@@ -3683,7 +3683,7 @@ if (
 
     if (
         $timeout_baslama !== false &&
-        (time() - $timeout_baslama) >= 8
+        (time() - $timeout_baslama) >= 15
     ) {
 
         if (
