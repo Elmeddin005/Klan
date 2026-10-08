@@ -3536,40 +3536,39 @@ $maks_can =
     (int)$uzv['can'];
 
 
-/* ƏVVƏLKİ DÖYÜŞDƏN QALAN CAN VARSA */
-if ($uzv['son_can'] !== null) {
+/* =========================================================
+   OYUNÇUNUN CANI
+========================================================= */
 
-    $can =
-        (int)$uzv['son_can'];
-
-/* HAZIRDA 1-Cİ SLOTDA DÖYÜŞÜBSƏ */
 if (
     !empty($uzv['oyuncu1_id']) &&
     (int)$uzv['oyuncu1_id'] === $user_id &&
     $uzv['oyuncu1_can'] !== null
 ) {
 
-    $can =
-        (int)$uzv['oyuncu1_can'];
+    /* 1-ci slotda döyüşən oyunçu */
+    $can = (int)$uzv['oyuncu1_can'];
 
-/* HAZIRDA 2-Cİ SLOTDA DÖYÜŞÜBSƏ */
 } elseif (
     !empty($uzv['oyuncu2_id']) &&
     (int)$uzv['oyuncu2_id'] === $user_id &&
     $uzv['oyuncu2_can'] !== null
 ) {
 
-    $can =
-        (int)$uzv['oyuncu2_can'];
+    /* 2-ci slotda döyüşən oyunçu */
+    $can = (int)$uzv['oyuncu2_can'];
 
-/* DÖYÜŞMƏYİB */
 } else {
 
+    /* Döyüşməyən qrup üzvü */
     $can =
         (int)$ilkin_can +
         (int)$uzv['can'];
 }
 
+if ($can < 0) {
+    $can = 0;
+}
 
 /* CAN 0-DAN AŞAĞI OLA BİLMƏZ */
 if ($can < 0) {
