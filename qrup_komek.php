@@ -1445,24 +1445,26 @@ if (
     /*
      * Qalib və məğlub oyunçuları döyüşdən çıxar.
      */
-   $stmt_meglub = $pdo_qrup->prepare("
+  $stmt_meglub = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
         doyuse_qosuldu = 0,
         doyus_bildirisi = CASE
-            WHEN terefi = ? THEN 2
-            WHEN terefi = ? THEN 0
+            WHEN user_id = ? THEN 2
+            WHEN user_id = ? THEN 0
             ELSE doyus_bildirisi
         END
     WHERE qrup_id = ?
+      AND user_id IN (?, ?)
       AND status = 1
 ");
-və:
 
 $stmt_meglub->execute([
-    $timeout_teref,
-    $reqib_teref,
-    $qrup_id
+    $timeout_user_id,
+    $reqib_user_id,
+    $qrup_id,
+    $timeout_user_id,
+    $reqib_user_id
 ]);
 }
 /*
@@ -2466,14 +2468,15 @@ $qrup_netice = null;
 
 $stmt_netice = $pdo_qrup->prepare("
     SELECT
-        qd.bitdi,
-        qd.qalib_id,
-        qd.bitdi_qalib,
-        qd.bitdi_meglub,
-        qd.hec_hece,
-        qd.novbe_baslama_tarixi,
-        qd.oyuncu1_id,
-        qd.oyuncu2_id
+    qd.bitdi,
+    qd.qalib_id,
+    qd.bitdi_qalib,
+    qd.bitdi_meglub,
+    qd.hec_hece,
+    qd.novbe_baslama_tarixi,
+    qd.oyuncu1_id,
+    qd.oyuncu2_id,
+    qu.terefi AS qalib_terefi
     FROM qrup_doyusleri qd
     LEFT JOIN qrup_uzvleri qu
         ON qu.qrup_id = qd.qrup_id
@@ -2602,12 +2605,12 @@ if (
     $menim_qrup_neticesi = 'hec_hece';
 
 } elseif (
-    isset($qrup_netice['qalib_id'])
+    isset($qrup_netice['qalib_terefi'])
 ) {
 
     if (
-        (int)$qrup_netice['qalib_id'] ===
-        (int)$my_id
+        (int)$qrup_netice['qalib_terefi'] ===
+        (int)$menim_terefim
     ) {
         $menim_qrup_neticesi = 'qalib';
 
@@ -3283,15 +3286,8 @@ $maks_can =
 
 
 
-/* ƏVVƏLKİ DÖYÜŞDƏN QALAN CAN VARSA */
-if ($uzv['son_can'] !== null) {
-
-    $can =
-        (int)$uzv['son_can'];
-
-
-/* HAZIRDA 1-Cİ SLOTDA DÖYÜŞÜRSƏ */
-} elseif (
+/* HAZIRDA 1-Cİ SLOTDA DÖYÜŞÜBSƏ */
+if (
     !empty($uzv['oyuncu1_id']) &&
     (int)$uzv['oyuncu1_id'] === $user_id &&
     $uzv['oyuncu1_can'] !== null
@@ -3300,8 +3296,7 @@ if ($uzv['son_can'] !== null) {
     $can =
         (int)$uzv['oyuncu1_can'];
 
-
-/* HAZIRDA 2-Cİ SLOTDA DÖYÜŞÜRSƏ */
+/* HAZIRDA 2-Cİ SLOTDA DÖYÜŞÜBSƏ */
 } elseif (
     !empty($uzv['oyuncu2_id']) &&
     (int)$uzv['oyuncu2_id'] === $user_id &&
@@ -3311,14 +3306,14 @@ if ($uzv['son_can'] !== null) {
     $can =
         (int)$uzv['oyuncu2_can'];
 
-
-/* HEÇ DÖYÜŞMƏYİB / REZERVDƏDİR */
+/* DÖYÜŞMƏYİB */
 } else {
 
     $can =
         (int)$ilkin_can +
         (int)$uzv['can'];
 }
+
 
 
 /* CAN 0-DAN AŞAĞI OLA BİLMƏZ */
@@ -3547,28 +3542,27 @@ if ($uzv['son_can'] !== null) {
     $can =
         (int)$uzv['son_can'];
 
-
-/* HAZIRDA 1-Cİ SLOTDA DÖYÜŞÜRSƏ */
-} elseif (
+/* HAZIRDA 1-Cİ SLOTDA DÖYÜŞÜBSƏ */
+if (
     !empty($uzv['oyuncu1_id']) &&
-    (int)$uzv['oyuncu1_id'] === $user_id
+    (int)$uzv['oyuncu1_id'] === $user_id &&
+    $uzv['oyuncu1_can'] !== null
 ) {
 
     $can =
         (int)$uzv['oyuncu1_can'];
 
-
-/* HAZIRDA 2-Cİ SLOTDA DÖYÜŞÜRSƏ */
+/* HAZIRDA 2-Cİ SLOTDA DÖYÜŞÜBSƏ */
 } elseif (
     !empty($uzv['oyuncu2_id']) &&
-    (int)$uzv['oyuncu2_id'] === $user_id
+    (int)$uzv['oyuncu2_id'] === $user_id &&
+    $uzv['oyuncu2_can'] !== null
 ) {
 
     $can =
         (int)$uzv['oyuncu2_can'];
 
-
-/* HEÇ DÖYÜŞMƏYİB / REZERVDƏDİR */
+/* DÖYÜŞMƏYİB */
 } else {
 
     $can =
