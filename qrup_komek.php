@@ -601,8 +601,8 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
                 $timeout_user_id
             ]);
 
-            $novbeti =
-                $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
+          $novbeti =
+    $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
 
 if ($novbeti) {
 
@@ -630,7 +630,7 @@ if ($novbeti) {
         }
     }
 }
-}
+
 
 
 /* =========================================================
