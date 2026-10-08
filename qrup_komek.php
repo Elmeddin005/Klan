@@ -1445,23 +1445,18 @@ if (
     /*
      * Qalib və məğlub oyunçuları döyüşdən çıxar.
      */
-  $stmt_meglub = $pdo_qrup->prepare("
+ $stmt_meglub = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
         doyuse_qosuldu = 0,
-        doyus_bildirisi = CASE
-            WHEN user_id = ? THEN 2
-            WHEN user_id = ? THEN 0
-            ELSE doyus_bildirisi
-        END
+        doyus_bildirisi = 2
     WHERE qrup_id = ?
       AND user_id IN (?, ?)
       AND status = 1
+      AND doyuse_qosuldu = 1
 ");
 
 $stmt_meglub->execute([
-    $timeout_user_id,
-    $reqib_user_id,
     $qrup_id,
     $timeout_user_id,
     $reqib_user_id
@@ -2208,11 +2203,40 @@ exit;
     exit;
 }
 
+/* =========================================================
+   SON DÖYÜŞÜN BİTİB-BİTMƏDİYİNİ YOXLA
+========================================================= */
+
+$stmt_son_doyus = $pdo_qrup->prepare("
+    SELECT bitdi
+    FROM qrup_doyusleri
+    WHERE qrup_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+");
+
+$stmt_son_doyus->execute([
+    $qrup_id
+]);
+
+$son_doyus = $stmt_son_doyus->fetch(PDO::FETCH_ASSOC);
+
+$son_doyus_bitib = (
+    $son_doyus &&
+    (int)$son_doyus['bitdi'] === 1
+);
+
+
+$son_doyus_bitib = (
+    $son_doyus &&
+    (int)$son_doyus['bitdi'] === 1
+);
+
 
 /* =========================================================
    AVTOMATİK BİZİM DÖYÜŞÇÜ
 ========================================================= */
-
+if (!$son_doyus_bitib) {
 $stmt_bizim_doyus =
     $pdo_qrup->prepare("
         SELECT id
@@ -2279,12 +2303,14 @@ if (
     ]);
 
 }
+}
 
 
 /* =========================================================
    AVTOMATİK RƏQİB DÖYÜŞÇÜ
 ========================================================= */
 
+if (!$son_doyus_bitib) {
 $stmt_reqib_doyus =
     $pdo_qrup->prepare("
         SELECT id
@@ -2379,7 +2405,7 @@ if (!$reqib_doyusde_olan) {
     }
 
 }
-
+}
 
 /* =========================================================
    GO = IZLE
