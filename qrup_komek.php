@@ -1484,7 +1484,8 @@ if (
     $timeout_sonuncudur &&
     $reqib_sonuncudur &&
     $menim_canli_say === 0 &&
-    $reqib_canli_say === 0
+    $reqib_canli_say === 0 &&
+    $hucum !== null
 ) {
 
     /*
