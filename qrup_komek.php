@@ -911,26 +911,30 @@ $stmt_timeout = $pdo_qrup->prepare("
 
     $baslama = false;
 
-    $stmt_timeout_vaxt = $pdo_qrup->prepare("
-        SELECT
-            novbe_baslama_tarixi
-        FROM qrup_doyusleri
-        WHERE qrup_id = ?
-          AND bitdi = 0
-          AND novbe_baslama_tarixi IS NOT NULL
-          AND (
-              oyuncu1_id = ?
-              OR oyuncu2_id = ?
-          )
-        ORDER BY id DESC
-        LIMIT 1
-    ");
+$stmt_timeout_vaxt = $pdo_qrup->prepare(
+    "
+    SELECT
+        novbe_baslama_tarixi
+    FROM qrup_doyusleri
+    WHERE qrup_id = ?
+      AND bitdi = 0
+      AND novbe_baslama_tarixi IS NOT NULL
+      AND novbe_baslama_tarixi >= ?
+      AND (
+          oyuncu1_id = ?
+          OR oyuncu2_id = ?
+      )
+    ORDER BY id DESC
+    LIMIT 1
+    "
+);
 
-    $stmt_timeout_vaxt->execute([
-        $qrup_id,
-        (int)$tr['user_id'],
-        (int)$tr['user_id']
-    ]);
+$stmt_timeout_vaxt->execute([
+    $qrup_id,
+    $tr['son_doyuse_qosulma_vaxti'],
+    (int)$tr['user_id'],
+    (int)$tr['user_id']
+]);
 
     $timeout_vaxt_row =
         $stmt_timeout_vaxt->fetch(PDO::FETCH_ASSOC);
@@ -1867,10 +1871,7 @@ $terefde_canli_qalan =
              */
 
         
-if (
-    $novbeti &&
-    $terefde_canli_qalan > 0
-) {
+if ($novbeti) {
     $stmt_qos = $pdo_qrup->prepare("
                     UPDATE qrup_uzvleri
                     SET
