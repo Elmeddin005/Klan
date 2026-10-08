@@ -604,32 +604,34 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
             $novbeti =
                 $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
 
-$terefde_canli_qalan = 0;
-            if (
-    $novbeti &&
-    $terefde_canli_qalan > 0
-) {
+if ($novbeti) {
 
-                /*
-                 * Növbəti oyunçunu döyüşə qoş.
-                 */
-                $stmt_qos =
-                    $pdo_qrup->prepare("
-                        UPDATE qrup_uzvleri
-                        SET
-                            doyuse_qosuldu = 1,
-                            doyus_bildirisi = 1,
-                            son_doyuse_qosulma_vaxti = NOW()
-                        WHERE id = ?
-                          AND status = 1
-                          AND doyuse_qosuldu = 0
-                        LIMIT 1
-                    ");
+$novbeti =
+    $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
 
-                $stmt_qos->execute([
-                    (int)$novbeti['id']
-                ]);
-            }
+if ($novbeti) {
+
+    /*
+     * Növbəti oyunçunu döyüşə qoş.
+     */
+    $stmt_qos =
+        $pdo_qrup->prepare("
+            UPDATE qrup_uzvleri
+            SET
+                doyuse_qosuldu = 1,
+                doyus_bildirisi = 1,
+                son_doyuse_qosulma_vaxti = NOW()
+            WHERE id = ?
+              AND status = 1
+              AND doyuse_qosuldu = 0
+            LIMIT 1
+        ");
+
+    $stmt_qos->execute([
+        (int)$novbeti['id']
+    ]);
+}
+}
         }
     }
 }
