@@ -1342,7 +1342,8 @@ $komanda_qalib_var = false;
 
 if (
     $menim_canli_say === 0 &&
-    $reqib_canli_say > 0
+    $reqib_canli_say > 0 &&
+    $timeout_sonuncudur
 ) {
     $komanda_qalib_var = true;
 }
@@ -1357,7 +1358,7 @@ if (
 if (
     $menim_canli_say === 0 &&
     $reqib_canli_say > 0 &&
-    $reqib_hucum_edib
+    $timeout_sonuncudur
 ) {
     $qalib_id = (int)$reqib_user_id;
     $meglub_id = (int)$tr['user_id'];
