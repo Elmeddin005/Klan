@@ -468,6 +468,38 @@ if ($timeout_doyus) {
                 (int)$timeout_doyus['oyuncu2_id'];
         }
 
+        /*
+ * Eyni döyüşdə zərbə vurmayan BÜTÜN oyunçuları
+ * məğlub/timeout kimi işarələ.
+ */
+if (!empty($timeout_oyuncular)) {
+
+    $placeholders =
+        implode(',', array_fill(
+            0,
+            count($timeout_oyuncular),
+            '?'
+        ));
+
+    $stmt_timeout_hamisi =
+        $pdo_qrup->prepare("
+            UPDATE qrup_uzvleri
+            SET
+                doyuse_qosuldu = 0,
+                doyus_bildirisi = 2
+            WHERE qrup_id = ?
+              AND user_id IN ($placeholders)
+              AND status = 1
+        ");
+
+    $stmt_timeout_hamisi->execute(
+        array_merge(
+            [$qrup_id],
+            $timeout_oyuncular
+        )
+    );
+}
+
 
         foreach (
             $timeout_oyuncular
@@ -572,7 +604,7 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
             $novbeti =
                 $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
 
-
+$terefde_canli_qalan = 0;
             if (
     $novbeti &&
     $terefde_canli_qalan > 0
@@ -1360,27 +1392,25 @@ if (
     /*
      * Qalib və məğlub oyunçuları döyüşdən çıxar.
      */
-    $stmt_meglub = $pdo_qrup->prepare("
-        UPDATE qrup_uzvleri
-        SET
-            doyuse_qosuldu = 0,
-            doyus_bildirisi = CASE
-                WHEN user_id = ? THEN 2
-                WHEN user_id = ? THEN 0
-                ELSE doyus_bildirisi
-            END
-        WHERE qrup_id = ?
-          AND user_id IN (?, ?)
-          AND status = 1
-    ");
+   $stmt_meglub = $pdo_qrup->prepare("
+    UPDATE qrup_uzvleri
+    SET
+        doyuse_qosuldu = 0,
+        doyus_bildirisi = CASE
+            WHEN terefi = ? THEN 2
+            WHEN terefi = ? THEN 0
+            ELSE doyus_bildirisi
+        END
+    WHERE qrup_id = ?
+      AND status = 1
+");
+və:
 
-    $stmt_meglub->execute([
-        $meglub_id,
-        $qalib_id,
-        $qrup_id,
-        $meglub_id,
-        $qalib_id
-    ]);
+$stmt_meglub->execute([
+    $timeout_teref,
+    $reqib_teref,
+    $qrup_id
+]);
 }
 /*
  * =================================================
@@ -1673,6 +1703,7 @@ $stmt_cixar->execute([
  * TƏRƏFDƏ BAŞQA CANLI OYUNÇU VAR?
  * =================================================
  */
+
 
 $stmt_teref_canli = $pdo_qrup->prepare("
     SELECT COUNT(*)
