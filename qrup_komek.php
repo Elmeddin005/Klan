@@ -1954,16 +1954,7 @@ $stmt_son_doyus->execute([
 
 $son_doyus = $stmt_son_doyus->fetch(PDO::FETCH_ASSOC);
 
-$son_doyus_bitib = (
-    $son_doyus &&
-    (int)$son_doyus['bitdi'] === 1
-);
-
-
-$son_doyus_bitib = (
-    $son_doyus &&
-    (int)$son_doyus['bitdi'] === 1
-);
+$son_doyus_bitib = false;
 
 
 /* =========================================================
@@ -2290,44 +2281,16 @@ if (
      * Aktiv döyüş varsa,
      * raundun başlanğıc vaxtını götürürük.
      */
-$stmt_aktiv_vaxt = $pdo_qrup->prepare("
-    SELECT
-        novbe_baslama_tarixi
-    FROM qrup_doyusleri
-    WHERE qrup_id = :qrup_id
-      AND bitdi = 0
-      AND novbe_baslama_tarixi IS NOT NULL
-      AND (
-          oyuncu1_id = :user_id
-          OR oyuncu2_id = :user_id
-      )
-    ORDER BY id DESC
-    LIMIT 1
-");
-    $stmt_aktiv_vaxt->execute([
-    ':qrup_id' => $qrup_id,
-    ':user_id' => $my_id
-]);
+$baslama_vaxti = null;
 
-    $aktiv_doyus_vaxt =
-        $stmt_aktiv_vaxt->fetch(PDO::FETCH_ASSOC);
+if (
+    $menim_status &&
+    !empty($menim_status['son_doyuse_qosulma_vaxti'])
+) {
+    $baslama_vaxti =
+        $menim_status['son_doyuse_qosulma_vaxti'];
+}
 
-    if (
-        $aktiv_doyus_vaxt &&
-        !empty($aktiv_doyus_vaxt['novbe_baslama_tarixi'])
-    ) {
-
-        $baslama_vaxti =
-            $aktiv_doyus_vaxt['novbe_baslama_tarixi'];
-
-    } elseif (
-        $menim_status &&
-        !empty($menim_status['son_doyuse_qosulma_vaxti'])
-    ) {
-
-        $baslama_vaxti =
-            $menim_status['son_doyuse_qosulma_vaxti'];
-    }
 
     /*
      * Normal aktiv oyunçu üçün 59 saniyə hesabla.
@@ -2360,7 +2323,8 @@ $menim_qrup_neticesi = null;
 
 if (
     $qrup_netice &&
-    (int)$qrup_netice['bitdi'] === 1
+    (int)$qrup_netice['bitdi'] === 1 &&
+    empty($tr['doyuse_qosuldu'])
 ) {
 
     if (
