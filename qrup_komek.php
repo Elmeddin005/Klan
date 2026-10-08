@@ -1349,13 +1349,15 @@ if (
 
 if (
     $reqib_canli_say === 0 &&
-    $menim_canli_say > 0
+    $menim_canli_say > 0 &&
+    $hucum_edib
 ) {
     $komanda_qalib_var = true;
 }
 if (
     $menim_canli_say === 0 &&
-    $reqib_canli_say > 0
+    $reqib_canli_say > 0 &&
+    $reqib_hucum_edib
 ) {
     $qalib_id = (int)$reqib_user_id;
     $meglub_id = (int)$tr['user_id'];
