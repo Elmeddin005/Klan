@@ -1024,6 +1024,8 @@ $stmt_hucum->execute([
 ]);
 
 $hucum = $stmt_hucum->fetch(PDO::FETCH_ASSOC);
+
+
             /*
              * =================================================
              * 4. BU OYUNÇU ZƏRBƏ VURUBMU?
@@ -1445,18 +1447,23 @@ if (
     /*
      * Qalib və məğlub oyunçuları döyüşdən çıxar.
      */
- $stmt_meglub = $pdo_qrup->prepare("
+$stmt_meglub = $pdo_qrup->prepare("
     UPDATE qrup_uzvleri
     SET
         doyuse_qosuldu = 0,
-        doyus_bildirisi = 2
+        doyus_bildirisi = CASE
+            WHEN user_id = ? THEN 2
+            WHEN user_id = ? THEN 0
+            ELSE doyus_bildirisi
+        END
     WHERE qrup_id = ?
       AND user_id IN (?, ?)
       AND status = 1
-      AND doyuse_qosuldu = 1
 ");
 
 $stmt_meglub->execute([
+    $timeout_user_id,
+    $reqib_user_id,
     $qrup_id,
     $timeout_user_id,
     $reqib_user_id
