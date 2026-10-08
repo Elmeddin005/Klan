@@ -606,11 +606,6 @@ echo '<!-- TIMEOUT UPDATE USER=' . $timeout_user_id . ' ROWS=' . $stmt_timeout_c
 
 if ($novbeti) {
 
-$novbeti =
-    $stmt_novbeti->fetch(PDO::FETCH_ASSOC);
-
-if ($novbeti) {
-
     /*
      * Növbəti oyunçunu döyüşə qoş.
      */
@@ -909,57 +904,13 @@ $stmt_timeout = $pdo_qrup->prepare("
      * =====================================================
      */
 
-    $baslama = false;
+$baslama = false;
 
-$stmt_timeout_vaxt = $pdo_qrup->prepare(
-    "
-    SELECT
-        novbe_baslama_tarixi
-    FROM qrup_doyusleri
-    WHERE qrup_id = ?
-      AND bitdi = 0
-      AND novbe_baslama_tarixi IS NOT NULL
-      AND novbe_baslama_tarixi >= ?
-      AND (
-          oyuncu1_id = ?
-          OR oyuncu2_id = ?
-      )
-    ORDER BY id DESC
-    LIMIT 1
-    "
-);
-
-$stmt_timeout_vaxt->execute([
-    $qrup_id,
-    $tr['son_doyuse_qosulma_vaxti'],
-    (int)$tr['user_id'],
-    (int)$tr['user_id']
-]);
-
-    $timeout_vaxt_row =
-        $stmt_timeout_vaxt->fetch(PDO::FETCH_ASSOC);
-
-    if (
-        $timeout_vaxt_row &&
-        !empty($timeout_vaxt_row['novbe_baslama_tarixi'])
-    ) {
-        $baslama = strtotime(
-            $timeout_vaxt_row['novbe_baslama_tarixi']
-        );
-    }
-
-    /*
-     * Aktiv raund yoxdursa,
-     * oyunçunun döyüşə qoşulma vaxtından hesabla.
-     */
-    if (
-        $baslama === false &&
-        !empty($tr['son_doyuse_qosulma_vaxti'])
-    ) {
-        $baslama = strtotime(
-            $tr['son_doyuse_qosulma_vaxti']
-        );
-    }
+if (!empty($tr['son_doyuse_qosulma_vaxti'])) {
+    $baslama = strtotime(
+        $tr['son_doyuse_qosulma_vaxti']
+    );
+}
 
     if ($baslama === false) {
         continue;
