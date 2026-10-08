@@ -2227,15 +2227,15 @@ $qrup_netice = null;
 
 $stmt_netice = $pdo_qrup->prepare("
     SELECT
-    qd.bitdi,
-    qd.qalib_id,
-    qd.bitdi_qalib,
-    qd.bitdi_meglub,
-    qd.hec_hece,
-    qd.novbe_baslama_tarixi,
-    qd.oyuncu1_id,
-    qd.oyuncu2_id,
-    qu.terefi AS qalib_terefi
+        qd.bitdi,
+        qd.qalib_id,
+        qd.bitdi_qalib,
+        qd.bitdi_meglub,
+        qd.hec_hece,
+        qd.novbe_baslama_tarixi,
+        qd.oyuncu1_id,
+        qd.oyuncu2_id,
+        qu.terefi AS qalib_terefi
     FROM qrup_doyusleri qd
     LEFT JOIN qrup_uzvleri qu
         ON qu.qrup_id = qd.qrup_id
@@ -2243,6 +2243,13 @@ $stmt_netice = $pdo_qrup->prepare("
        AND qu.status = 1
     WHERE qd.qrup_id = :qrup_id
       AND qd.bitdi = 1
+      AND NOT EXISTS (
+          SELECT 1
+          FROM qrup_uzvleri aktiv
+          WHERE aktiv.qrup_id = qd.qrup_id
+            AND aktiv.status = 1
+            AND aktiv.doyuse_qosuldu = 1
+      )
     ORDER BY qd.id DESC
     LIMIT 1
 ");
