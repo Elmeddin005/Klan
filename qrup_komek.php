@@ -1577,30 +1577,29 @@ if (
                 hec_hece,
                 novbe_baslama_tarixi
             )
-                       VALUES
-            (
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                NULL,
-                1,
-                NULL,
-                NULL,
-                0,
-                NOW()
-            )
+                  VALUES
+(
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    1,
+    NULL,
+    NULL,
+    0,
+    NOW()
+)
         ");
-
-        $stmt_qalib->execute([
-            $qrup_id,
-            $reqib_user_id,
-            $timeout_user_id,
-            $reqib_user_id,
-            $reqib_user_id,
-            $timeout_user_id
-        ]);
+$stmt_qalib->execute([
+    $qrup_id,
+    $reqib_user_id,
+    $timeout_user_id,
+    $reqib_user_id,
+    $reqib_user_id,
+    $timeout_user_id
+]);
         /* TIMEOUT QALİB/MƏĞLUB NƏTİCƏSİNDƏ SON CANLARI SAXLA */
 
 $timeout_son_can = null;
